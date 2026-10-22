@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evaluate - PAMANA 2026</title>
+  <meta name="description" content="Post-event evaluation for PAMANA 2026 participants.">
+  <link rel="icon" href="https://raw.githubusercontent.com/peyyyaa/Pamana-Registration-and-Attendance-Tracking-Website/refs/heads/main/Pamana%20Favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;600&display=swap">
+  <style>
+  /* =========================================================
+     Styles_Tokens — the PAMANA design system.
+     Every other style file uses these variables instead of
+     raw colors or sizes, so the whole site stays consistent.
+     ========================================================= */
+  :root {
+    /* ---- Color (sampled from the PAMANA brand guide) ---- */
+    --c-void:       #000714;  /* page background */
+    --c-deep-navy:  #06215C;  /* section bands, slabs */
+    --c-navy:       #0C3887;  /* borders, diagram lines */
+    --c-royal:      #0A3EA4;  /* links, secondary buttons */
+    --c-ice:        #7FD4FF;  /* tiny highlights only */
+    --c-starlight:  #EEF3FF;  /* main text */
+    --c-chrome:     #9DA5B1;  /* secondary text, labels */
+    --c-amber:      #F5A623;  /* ONE warm signal per screen */
+
+    --c-line: rgba(127, 212, 255, 0.18);  /* hairline rules */
+
+    /* ---- Type (free stand-ins for Gridnik / Agrandir) ---- */
+    --font-display: 'Chakra Petch', 'Arial Narrow', sans-serif;
+    --font-body:    'Sora', system-ui, sans-serif;
+    --font-mono:    'IBM Plex Mono', ui-monospace, monospace;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 1rem;
+    --text-lg: clamp(1.0625rem, 0.95rem + 0.5vw, 1.25rem);
+    --text-xl: clamp(1.75rem, 1.2rem + 2.4vw, 3rem);
+
+    /* ---- Spacing (8px scale) ---- */
+    --space-1: 0.5rem;   /*  8px */
+    --space-2: 1rem;     /* 16px */
+    --space-3: 1.5rem;   /* 24px */
+    --space-4: 2rem;     /* 32px */
+    --space-6: 3rem;     /* 48px */
+    --space-8: 4rem;     /* 64px */
+    --space-12: 6rem;    /* 96px */
+
+    --gutter: clamp(1rem, 4vw, 4rem);   /* page side margin */
+    --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  /* ---- Base ---- */
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--c-void);
+    color: var(--c-starlight);
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img { max-width: 100%; height: auto; display: block; }
+
+  :focus-visible {
+    outline: 2px solid var(--c-ice);
+    outline-offset: 3px;
+  }
+
+  /* Small monospaced "chart label" text */
+  .eyebrow {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-chrome);
+  }
+
+  /* ---- Buttons ---- */
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 48px;                 /* comfortable thumb target */
+    padding: 0 var(--space-3);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .button--primary {
+    background: var(--c-starlight);
+    color: var(--c-void);
+  }
+  .button--primary:hover { background: var(--c-ice); }
+
+  /* Film grain from the brand posters (static, no animation) */
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.09;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Respect phones/computers set to "reduce motion" */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  /* =========================================================
+     Styles_Evaluate — layout for the evaluation page only.
+     Uses the tokens from Styles_Tokens.
+     ========================================================= */
+
+  /* Error color for unanswered questions (from the brand's secondary orange-red) */
+  :root { --c-alert: #FF8A70; }
+
+  /* ---------- Header ---------- */
+  .eval-header {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: var(--space-3) var(--gutter) var(--space-6);
+    border-bottom: 1px solid var(--c-line);
+  }
+  /* the single light source from above */
+  .eval-header::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 50%;
+    top: -60%;
+    width: 140%;
+    height: 120%;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side,
+      rgba(127, 212, 255, 0.28),
+      rgba(10, 62, 164, 0.22) 50%,
+      transparent 100%);
+  }
+  /* one diagonal slab, like the posters */
+  .eval-header::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    right: 0;
+    width: 45%;
+    height: 100%;
+    background: var(--c-deep-navy);
+    opacity: 0.5;
+    clip-path: polygon(60% 0, 100% 0, 100% 100%, 20% 100%);
+  }
+
+  .eval-header__coords {
+    display: flex;
+    flex-wrap: wrap;                  /* on small phones the labels stack */
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-2);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--c-line);
+  }
+  .eval-header__wordmark img { width: min(56vw, 240px); }
+
+  .eval-title {
+    margin: var(--space-4) 0 var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-xl);
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .eval-intro {
+    margin: 0;
+    max-width: 34rem;
+    font-weight: 300;
+    color: var(--c-starlight);
+  }
+
+  /* ---------- Main column ---------- */
+  .eval-main {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 0 var(--gutter) var(--space-12);
+  }
+
+  /* ---------- Status panel ---------- */
+  .status { padding: var(--space-8) 0; }
+  .status[hidden] { display: none; }
+  .status__title {
+    margin: var(--space-2) 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-xl);
+    line-height: 1.1;
+  }
+  .status__body { margin: 0; max-width: 30rem; color: var(--c-chrome); }
+
+  /* ---------- Sections A–E ---------- */
+  .eval-section {
+    position: relative;
+    padding: var(--space-8) 0 var(--space-4);
+    border-bottom: 1px solid var(--c-line);
+  }
+  /* Big outlined letter, echoing the outlined "2026" */
+  .eval-section__letter {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(3.5rem, 2.5rem + 5vw, 6rem);
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--c-chrome);
+  }
+  .eval-section__title {
+    margin: var(--space-2) 0 var(--space-4);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-lg);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- One question ---------- */
+  .question {
+    margin: 0;
+    padding: var(--space-3) 0;
+    border: 0;
+    border-top: 1px dashed var(--c-line);
+  }
+  /* float: a browser trick that stops the legend sitting ON the border line */
+  .question__text {
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-md);
+  }
+  .question__code {
+    display: inline-block;
+    min-width: 2.5em;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-chrome);
+  }
+  .question.is-missing .question__text,
+  .question.is-missing .question__code { color: var(--c-alert); }
+
+  /* The 1–10 scale */
+  .scale {
+    clear: both;
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .scale__option { position: relative; display: block; }
+  /* Hide the real radio visually, but keep it usable by keyboard & screen readers */
+  .scale__option input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .scale__option span {
+    display: grid;
+    place-items: center;
+    height: 44px;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--c-chrome);
+    border: 1px solid var(--c-navy);
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
+  }
+  .scale__option:hover span { border-color: var(--c-ice); color: var(--c-starlight); }
+  .scale__option input:checked + span {
+    background: var(--c-starlight);
+    border-color: var(--c-starlight);
+    color: var(--c-void);
+    font-weight: 500;
+  }
+  .scale__option input:focus-visible + span {
+    outline: 2px solid var(--c-ice);
+    outline-offset: 2px;
+  }
+  .question.is-missing .scale__option span { border-color: var(--c-alert); }
+
+  .scale__ends {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-chrome);
+  }
+
+  /* ---------- Comments ---------- */
+  .eval-comments { padding: var(--space-6) 0 var(--space-2); }
+  .eval-comments__label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+  .eval-comments textarea {
+    width: 100%;
+    padding: var(--space-2);
+    font: inherit;
+    color: var(--c-starlight);
+    background: rgba(6, 33, 92, 0.35);
+    border: 1px solid var(--c-navy);
+    resize: vertical;
+  }
+  .eval-comments textarea:focus { border-color: var(--c-ice); outline: none; }
+
+  .form-error { min-height: 1.6em; margin: 0; color: var(--c-alert); }
+
+  /* ---------- Sticky submit bar ---------- */
+  .submit-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 calc(var(--gutter) * -1);
+    padding: var(--space-2) var(--gutter);
+    background: var(--c-void);
+    border-top: 1px solid var(--c-line);
+  }
+  .button--amber { background: var(--c-amber); color: var(--c-void); cursor: pointer; }
+  .button--amber:hover { background: #FFC15C; }
+  .button--amber:disabled { opacity: 0.6; cursor: wait; }
+
+  @media (min-width: 720px) {
+    /* letter sits in the left margin on wider screens */
+    .eval-section { padding-left: 7rem; }
+    .eval-section__letter {
+      position: absolute;
+      left: 0;
+      top: var(--space-8);
+    }
+    .eval-section__title { margin-top: 0; }
+  }
+
+  /* ---------- Sign-in step (GitHub version only) ---------- */
+  .signin { padding: var(--space-6) 0 var(--space-4); }
+  .signin[hidden] { display: none; }
+  .signin__title {
+    margin: var(--space-2) 0 var(--space-1);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-lg);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .signin__help { margin: 0 0 var(--space-4); max-width: 32rem; color: var(--c-chrome); font-size: var(--text-sm); }
+  .field { margin-bottom: var(--space-3); }
+  .field label { display: block; margin-bottom: var(--space-1); }
+  .field input {
+    width: 100%;
+    max-width: 28rem;
+    min-height: 48px;
+    padding: 0 var(--space-2);
+    font: inherit;
+    color: var(--c-starlight);
+    background: rgba(6, 33, 92, 0.35);
+    border: 1px solid var(--c-navy);
+    border-radius: 0;
+  }
+  .field input:focus { border-color: var(--c-ice); outline: none; }
+  .field__hint { margin: var(--space-1) 0 0; font-size: var(--text-xs); color: var(--c-chrome); }
+
+  </style>
+</head>
+<body>
+
+  <header class="eval-header">
+    <div class="eval-header__coords">
+      <span class="eyebrow">Post-event evaluation</span>
+      <span class="eyebrow">10.21.2026 · DPT Auditorium</span>
+    </div>
+    <div class="eval-header__wordmark">
+      <img  src="data:image/webp;base64,UklGRjIwAABXRUJQVlA4WAoAAAAQAAAAwgIAhgAAQUxQSMgQAAABj6S2bRvG1v9Xe0rdI+IIDjJQ9YRepmBAbhtJkqSQ/15nRtbs+Y6ICQCSsDr5tgK4UgWkekZl+oWLvXSmR6or4JmFxj7iO4D3wmAqbWVtKt8AlKrSahamE3BMlAfAg3hnP4DKA7BFFRXTgPZIP9gyqBdRYQD4msrjyFAX7imKotzb8aLSEt5UKKIPfvKC62BXHzzIB1D5t/rg5g/zI7+s64M/L7koab9l6c4fl4kkCZAJSTI8XNu2bMm2bYvY3R7SdWJ3dx8g2N2IQWPLELEVaU5cfvOxbtu+r+u2HY6xc13XfUf0fwLgSLKtunE59RI4FETGzDmFjjBTKN8rfP8csXTuN9PbtIwLiOh/Urtt7dhbXbFZ24xt1batYyU1j+39m/s0z97XfT3P54j+BzapVpfWarVavV7f4t60aaNqGQLdqArzG1Oej7jO2ZjybNiu2qiZg/WOjWmXIvTcxnRhfKNqLUJezXj/ebzNHnXHrN1k2iVxYdpttqqou9Aa0u8NjSnvtdVO3b8U8bTvQSXmIsGoMA7Ujganix+VH/zFEFc8qR4LRmQ0Ds1qG6JBFrsxLf7VADvcHuqdiMXTaNxmHKgfERa3HNW//t3gnhcNxoK7IlHPOLw0cDUiXFPMaHDF3w3g893C01hwSRRKGIc5tBgT7ihe8xb4twOPFTQZDUaBkaDJ9zFhY2Fhcm8wnUWhA23+GgYBEKTKBqojcamgz22g9L6SDxjBmjBLyT+KQquhgGLS6NWyw3aVZsNgLnE/gjSb2R0LRRyzgtKD+MDOVBisSdqMKLQbDFWFy9Hsm9K7q9FwHCRFlBeGTgfDuqLRcEPZQfpm6W4cJESUObQcDUPFOmkJpXdTWEHTgX5P9jQMTS9Gw+lC0XRf2UGg7R/j4FyiOUSpsoXqaHheoGe2UHq76QPG0B6HFUGsQRhaDwcUh8Yvld0iTfOBGATCnDe3OR6KMmoNZQf2vr3xQAwAcWg/IOoKkaP5l+XMACP9cR+N0xfAiYDYVAQG2OC/oljbua8h3AzEO87XGYchRsRQ/BMhoOQuUisYZCTsd61nPKaD+DIiboZnkLvdO4r1jKLir8pbj4tuqHMsodm7ejUVXyigMiJepx3U28JAlA53Z0dHR0en3NXp2ZW8s8PzOwHMHo3GRQFtDhf84Ei7d3QqTkPjX49Pbvx3BYhNxXP9ytkYSxb4LktUHAU0GApujEheo9a+EFgZylPTkHJAHtIwUxBjMTXK7NzWAHBDY0A/7/mZU6ul2zIV+81MYSiwbg3NYddR8aBZp7Lk3B4Uv92o2AkAGtDPeWLEZQct31I7NWBmU8pZvXfWejRsSNavUhNm9kpAVSkc8hrQQGG9xqVQaHdYzJhQ8XaBKQylwaxXw2zMIxprC0yBbwf5TfrFTsuomBeggVhwoO2b4pgGxJVKu/xG7jWztRpuhaTiT4iXlB0Bvk4PJ2pCnq88U886Q2ZMyqm4V7LvBcqv5JSZWaWGHwI+1IBTQWnu1Ch34CsBdeIZ7ydil7UbGjXhVn5RX8gD7800IEmfRsXHrj7lmM+i8tr6mop28qv0i32oOA5PBbFwQDpM69el0xpLPW4K2CA+k0ey9o+GaF804KnAp3B1J9sbXp/LNY0Sn+NKl3aabNTxWCusYvqftyeg4iB8FSS1Zxpa/HuVNVQ84dOifOYGhP3ehYo98FaQYm6zPAQqluTJa8pTDXiPKTPaGJl32UUNWyJRE95PBFSm7gluNTzeacB/m3JaOkVms8940FRsxQN/Kt7zMwXaiGxjGibjHNQo8zPld7+2mJfgsZSKzQnsTwFpTPiefKsBvCCvCj81kLBTuZ3WNmq45dwjUPE3Ep4VsC1xtD97UROJlS+Vk0I1j/NUnooABskrfCkVDyWxlwKkYfKclzVo+CHIHY1ZSUxBOd312apRk+xjAbVJrIvHTiJHxSoAQ97URHLlrfKbPOtnpgGu3TwVnyJxl7JQSpt9qDiJFJW/hBOK3eZRnU/FRgAYJS/TxzRWpXBZQGdqExHhgwZSVODVWix4ntaYm8YhAVvT2L88cqn4AYVjzlR8hzQVCEPkmUT2XENz8lVUPJBGjXK/3KjYh1QV8Mc1KEwk+KYBlUvsIw2kOqiM8fLCXY21ZrpYaiLVLwVUlM9jjz4NpLtZOUofE5fxvO91lYqQR8mLLBUfpmMK+AW5QGBC47Gw9mpUp2PK9+Wz0jWXihdTsh8FJMI4z50edVRc6Rhx/ayBlJuUy/Tcz3ZofOS0n6TiEFI+IWBt6cA9oYHUlUfsUdU+57nUMZuK+6B0gctR8Vha9lgAPSPnKWvW+CbhdY25aZkCl5YinXdtouK29O4JqHb942ECHVRsh/s3eZ6jJtJXnrJTTzMNcNnHUbEdqe9RpkoGbipOQ1H5kTxCTvuYMCH8VphEEIc1cgrnBHSQE3KOtf80pHqjAcU/BZRLi6tJY5nGnIDNnv96reXZBuAuFeE7RJ6jqPgJmgpC2FsNrUmWU/GsRr1yvVTgpmI7VBVwhx3sMM8N2E3FJV6//G5rQPWg0s+NyVnebmvYucyn37QGVF8LKJNlrnYN6M4oc9Qhcmp5e84TVNwO7wV5lqHicx0o4EbkjIBpjSdc0+ReYgcVe7Ra5bneXJhjcC5klB0nc0zQvAMLZ4h+jYBPx7BdGh+ZY5RXlcUtuIfidJs5SI7nWYKfSDjzWss4U4ME1qlxUJoi9+RfihNKohHuBkY63VZ/JJ2Sp/MZ6S8ZktOaVWicFMa9GOmRUmiAJ2P9ijhAjuXaBe9ZRk7l7o8VGtymRLN/JLLgF7k7tzdWUJsKUQLPc9HCBq/RfPvJtwqJJ06M9m8EEtkLjXOAfp+FjPaFwp+GNyOev0COEObaguRj8mTe9XihK79IZY80Am0+I/FCwfPwb4vZhNMwU+v4DimOfBjz/EROOthxbQp5clfOVkb8m+JO3FqLhCWMeu48WTLW5Yc0h2RLgldRO8ntp8MmFT6scWHUW6VG9mcpQqGQFAqFpFAoJIVCoYgyyigjolQoJIVCISmmrdvzww1LkeLXuF3JmyODspteSHXgsZpxd5pwwTqV1BOcj9sfCW7Y/6xj5H3E2e8+uXRINvtNRe5hXpcc98GcAP7xY+T7yoKxX3JZkOZyHOmCPO+1m7Gvy+kkBaaCao8d/K/HPBk9dC4/S87ZVocupFw4MPo/hMIXa/U+8xn9k0IDeS0m4/+nx4y1Kfk32GryuRg/7Fq+TY75oT3d9/jB/WrI+0UAQ8vOkFPaPlct9T7Z6MNiuHyLHHXEcd86j40sgh+XwCwWxWWnyQlvf2vN6bqLwvyynt76ErEoNjtfidhfHC7rjQWTtiL9Hpl3LWFx9HoZAOuDOFccfnS+HLCSRdJnyn+DcBuKXfV7kXigN+KL+SGwSO7zvRTw32LRJQ8VO0x/gWaHPOfYzmI5z6OPHHYGxszUOlqLBQp+hEWz/cNJciDZEgvVNnnWwaI5GB0MGpvHonnI9WI8atbmAryr/KhSs3+4+TotrUmjOxfgJoXVrl5yyB/dTjXSR41zuQAnFRT6lsYNBKmg54OJJFXUP9B18oxETQR5VJl09YTBac8GKv5CkK+UO1w9eSEcNRHmhAKxEG0X0QJlk55q5MMwhUcc3XFswPFfjRVh1CiocTwf7ZXGwUDsD+VodpxMqh1IRUqpSCkVKaUiXUL7jjxdsIiaCLRLoaOLHEximzyqC05SsQuB3lSeO54LVkbFUYRaqSA7lsh+WvPvBzW2hGLfKTelTnIgDRZaoSaCVbizqCMa5cHgqXJf6ofrEzZT8SuCbVMYI2BUrQrAXY2L4cwrf/qdjXWAiq8QbrWChvejZC9cLzlnhimNZeHYA6VP6AiGAQNzqImA/xQwQ9SRZ2JREyFfVl4o3XA9/FkqPkHICksL2sn+dOjU32rsCWmXArfToa5oXA/KFOwxsxGyE66bnDWjJoI+qgwVPCf7EuKSVolaKn5H0M+VK0WkJsKeVP4U2uG6yBm7pZEPy/4RuA/As3g2Lo5orA6rXkGV06lInRqHA7NfBSyYDZOtcJ1sPRQnEXiPMg3gKdmb1LYoFUeo2IHAbyqLubXkyUCrqfgboW9VwHtBpp8oW0OzdwIvRspa/+U3TGsgeAVb8v7f//+Lf0P+cZfytdkN5ObGx13KHdcOlqQz9/D1zi7dhyf76EX1G5W31mRwZeO0OpVo6x9avZ3sIa1+SDa3g0YvZGtzadpvNU23+D2g5bt+c6ZouC1D+4fG13hspfF+n0na/uJTS+OZWRnNu3I03+Gi+W7XFprPyhiggwGulzrscZc0jwFmY59dhzaqn/jwnPDaNdCl76JE5/ON6t2/fUCJ7t4u9WeuE5kY5RUwOZGlQPkWTJY5jhUMSO2wOSQ1Fex2bIHJmxKzsFYJVjuypQAeSTlYlVhA8RGsSiygDKv1UlUGRnGPGXstdACgeA9m53tslWA32RozeC30Zmawu0mY8oDhaaEG6BIumVsElEkwLHDmgQkM4rqQBz4Kqw31CQ3AXuHhzIMa4XsIC4QfljYJz4FRAYbvCgeBJuHUzIMW4ZOhJtdS4ZOldcI7YNrclFAGXBGOWhrJyJqFQUPXhX5gifDR0lrhLTBljiKAy/Z+Z2oDhiDmXQP2XgOT1t56XBIOWxrKyMxTBtCUeeG5RngF81UUr3ocsDQzkfJ1j2f+L801UAaAFmHnDA864fHUc7Xwwloz5W0F54UGoV57e+sMhZN0orAx88S/1xid91DYKOSwup9G7888+EPnKq8l/x5Tp+kchHhaWPCGhh/NLOigeyFCWSV0G6qluwPyScH4yAyCS/SEsyHzjX+XmRX0bIbzaAj8MVPgBD3fI8nXniuFDiMln+lZDfeBINg0I2A7fbch0ZdBe+n5C757fZ7sq1FvcnAGwC59P8K7PvOF5wrhuUc7fQ/De6erETZ3STeyvqO8bHwp0vjM/5neS9/LSLjNcQZW6wRme8d5aSWSJlguPBHXUvZtReJN0gfYzf4u8tINSF6X+STWtvKyx0ixQZpj6K5QntWtNvLSrUgz+7HnMuGxcJCXtiHVGuEPDB8Q9mRz64O8bGIj0q3NPPJvpS/lpfeRcpXQZ6lOOJ/F7X/mZd1lSDv70P8RN+spvc8i9UrhuaUK4Ur21kTvVihm73suFR6kUfqRvpPboFgmPPAsFy5nbW30zkO1JtX9ZHsm6ft+LVSXCff8L2Vqpf30Hd8J7cwDzxXCjSRN9G6FuvDQs0pozNB2j9P3/XroZxY964QTfq30boRBYdFzp7AnM2ukdytMZuDZImz2KH1H3/HdMCnA865QnY3Nekjv8zD6OlPvOCHAuWuUvv1lMPpTqHekiCx8/Rv6ju+B2UOZd34nWTgh5endOhtmm4V3fs3C9yxshL79tTBclcE9r16KFwtO0fsCLC8ScNfrMMVDGdhSehMEQRAEQRAEQRAEQRAc+DjwceAeYPZVhlMHLFSYZRS+8voCgiAIgiAIgiAIgiAIgiC4DADeCZw8aGHTd8rIwJf4/d7ngqas7RbhhZfhioLlku39MxYGC2zc/x3EvjDKC3Da3hNk4YvDGBDsuHc/5J6QcNXaM8xc+CBZv+8tOLvDKJNQMW3qHLLxRWG8d5idnjbzaBbcnWEBd+1cx4zJtefudr16+crc3Nzc3Nzc3Nzc3NzcmtenOytxrTpzu9vc3Nzc3Nzc3Nzc3NzczKx53VSO9AFWUDggRB8AAJCeAJ0BKsMChwA+USCORaOhoRPYLmA4BQSzt3weDe2shIaLGLNVzBzjTyB+qtBmEB+MH4Z+TduAEGA/u/8ltX5upQb4Gs31wrW30527T06dR8ifzT8R/1i9S/65/a/x3/cLzJfXf3H8oP2p4CrXI+V/dH9Z/cPGq8KflfqC/jX8t8C/eh6p/cP1n9gL2k+l/sL4939l6DeIB/If6L/wfU/+q/rX5bH0r/G/s38AH8X/rn/R/yf5hfSj+3f8L+9f6X9wfZ3+Nf27/q/4j/Kf+r/OfYJ/Ff5n/tv7P/iv208CH6iewl+p/+t/PU5P1OMgS0styOaTd0D8SEBZa2CLZKRf4ujGqn1EidZQH1t4C8HbcF8OS42/zrS15pNjibVmo6Yh275qZPHnyDtVf3toM+Fby1n0SDoWtwJZFJvBUuTotVquIweUsP1bfH6ujKQHfqS7afukbYkEuqR+WFLyXpZ/yyy9taVguMCqQsp6u9m0cHJSHxF/cPIB7Gl4a1hqecE5KTOddIovTBr4rGl1Au00ZLmNZiwt5mf4TNhi3WjN7QHocWSHut14hHJbobpiXEKi8Of57i8W02kp1Bemk0jSeEZzn1e2WNBygEX0Frm3Lyol/3+C6Rd3fJ7oP7kosA2bGpDiomQ6FHuILJv62J+ZMkAsdPMUuXg1t9Z1sZsuOJcq483iSZ1Kg11Yp/aquRskdGlhCDD2o03IPQ9b2ZiZU+pjH4jVHksGe/BAsiM7dgVflInNM/YuLkvwZpitgiZKKDkwLUH4/qnqu+gMFkF4kRQnQaTuL5xZuuiM/FylqZVFDhkzPwmMsH8d8hjxgcWcQKr/qDWzYXj+ORiWXV3RVxoRullyeZG/AE8v5exKP9hOwdaHDL/+GHNihLOp61ImiSNrE300A7Qu1FOjSrI3rHGnf45Bziofpc9gLns6Wg3u/4htcr6kLbNj2Xvox7G9TBR5WEJy98pUgKx/Jkp7JNb7zV6iY1j8a0X0JKd83d+WJHGsHclJXh9auNPvHyD1moUl+zlz12Czj+GbbcYXUiNrrTlB8PQX6Z0hpSibJfV4ygchbybZsJOvg3/lpmS2UJJXJ6z/9LK/opn4vsBkbvqUlhi3Gv/D6JWjGR786ObJCC+wAoput20qm9BQuFKkS/TndQC5QN41mQ47wbwPnbIvKhWDMViX+U0fTGeurSgCOXGIQb1ioheeBZlbqnk5hoqrcv+G7XasxWSjYUOOoFgvlo7T7C/cvy50WazvzOwk79NLVgrEEnGPB40djlf2dKashVPHLhHyAGhn6OvyX+ieIhqVI3VGf/jOFig4R0cgP4ZZvrTOb3b+s3fvYZe1nMUVEFncDRhu28DZtSIvOm7h/IOUzBrWTfWdLJv7Olk39nSyb+zpZN/Z0sm/s6WTfr4UlY//U4NEiOpgw+mPOAbhrEKslUtzJYVojA/2WDSzyfuFEN6DJ4HgSNOGXIUgN6B4WPwxHXvabwCsnQkX+wOnrdLM/bTYhfxZo7nOpRDV+TqA/ID+58NtP1/71qr8+s6z0OnGgvx5S/cki4y9rbZIfVuWZnV8H/DI150CBhlrL1KdqK6ePKWlXaAgBY/XcP9iZlx7r6GPez4OPe19DHva+hYZnfnJ3NXOxLk8ClmlDpmMfm23GLQR/kHtWmV4T1VjuAWZsNKcqUr6P9S8TGERjmXd73iDB5GAAPbc+J6d855Nvhqj8GvgvZzJDQIAMEliCs2KSf01m4rhIi/b0Bp9XQXqy0J5A/V/6ZEPd0HgkDB8pIicTFMi4mUJxWVyC3nwBqn0A3zi0Tm0fRy0qFngTT/AetXNYH7ZQrdH3IugDzUDxPcilZ1fBidGtk5/KcBrZ3gDRg88z/8laKyoBFeexygHinDWL1ys6m9o1o6zKTnMbUXxwJq8p76LAEqN2aHnMJyydVo0tljn0Bh2iD4HaERkA+/k5S5B71FyTPYJfn5+VDsD/gUBvhuo8+6h858jj8gThudFqM/snJJmnDBc5zk+JfKdY3CvJTk77CaSmwrJ0OK0oPr5Gvv9PYB6jn1Z8192ZfxUMndN1pgpD6QMdQLwcsdDm1jzcPMy8pMSB6JrdvwmhFYANEKNlprP/tT5yiQE9ekm3z3J1vgowS74apXnUDbRsZ3pub4caaDbz5brGetCYcfL6B7ZsVfzy6iYfaNIhnfkgj6JUr3vcjqF7+gebscjDeP90Ix/U83oQ4B18tILJ1dJiN/XnD+DX40OFsbg0zTD+kgfIv0WOgn1otByVCJsdofBm7eDuQkqC+/iBd8ptPrw2/vQk+deVkUmqvtPktwmTEQUGhQ6mqj41/rWXT+qHoQSUDvHZ9oF+KYwKNZ3+gCbFd/bbEry6xA+YAshT1dT7dWdjYqOjMkcq3xLx1J1TJX326ZJfAaVeK9cpofEELb1yNtPQc48cJ/nKVh7Dgpwr29iN2wymbk6/7LbF+GXM37dEmggPtCweumydDjvLTL486MiQNZSBmu2nCh9QrD39588/+p2kWBFP3J1zwgTOUFgdnfR+4YPvRpMpup0wbE5CinnjeB/+1RfS4dDTxyoeiaTFG6g4sNnktF80Kv1a2BpLbJBpLOrUW530VjyK4gXg1VYLqAYYQDUwyEN9VX8aaFEK3bTE0AdcsSI6xSCGFg/QUPTRHF15POLEamgpBw/k0xnJFGvNB3Djo/HmVDidHKZmD1cllA9TQpdX3mYk0Kg09A79YYq0r58dThQEKdk9Su+CLzrkRmkqUtkUt+NS4PNJZ1pFpoSNQbBWuoRP0Sh3o9a0d3+4P+ML+LNAqY3ColGEGG5tmcOwIznoQMK+Jm+FnwL3nYawqm8TbY94jXT4ow7eCYUV3/kMzRPlADKqgkpr5tIekbmmmI3CjTYMGxSt+mzH7qIheGPxMfJXGsfMVVCwRpjhoL4C4IaqB75x+je9tCS1BJR53AcL6eKSK9AjgtOPu3owA1g5sB3dQpEQrIux/bLW0w2QJOf8eESMurx7n8XJ+FM3W0SuP1SZ/b5YS0PniXbxOrcV1JXw8ZarZcOxDZUGkoC5UUjDeEq30PUAf6N0ttXgLrMpD6wb3LmC03/yjHXrF2UvHDJE5b1ecwZdFtv4f6Nz2OUC13IYqBO6ugL6XESlHnudUc+N1YqDmKl5N9TMDIpcOuW0+qBATr9h9a2AphsoOFEL3PCK99lWNP8crPuVANbYTcBHhYPu1lUyPTjtW1up/9nK4hO+EDjlzcghqDas7kAmluimXmbQDDAicEUNj47RQT5NxXMirhDfyVeHc7OiPrzRFKraumgmj8p/4dr5ty2nRh7+ERVERxXBPYGFAQXFKABpXXvZ8nyvUereO+U5YXco/NB4Fx7VEpQbIS8c0HLTCQJ6AqvmfBPiy6iL/h2srIKCvHMSmcdeOjUeZtSw+NdYYke1pXTGCi1Ncsrh0jHz21rAsYdS53OLMh8Rv3glImkeiLMFM7F1xBGudNNXa3GDxyiHGlaY6hjzfshDkk9N2omkdPuX+uDZ4fdnbMpRthp8iDluoD9ZNALwNCRs/hwq8xnLNaIae24uGvMIHwFnlHl3Lh43cGVUVDyjwzOchYVa508aZnFhEPHMnUQck+TeKQgeDKy5y5ENrwUNbCdtCUtLqJ8peFfDSczraIU81KXQ9J9W72sk2pYcBcRxQtRKP++arsW07WazYQFVbr8hQw0z4/J4qhOXmUA6oePZwDryYuAWAJzH4eZp6vKMSL+KIq3AStzfblsenJAnV/Kkjver+yszYSJPQXudHInQZE4/kvIyxucLEuYhdNYxpa/FAUjUTRfAh4E23bjkl8tJvnVXnv7exxCSTTvgeg4Y5UJbr++wd9uV1Ar53QxoW+aAB4PzQ9ZPvg0P4R9hZ53hBk6w6jMOqPp0d0nw3oHr9L12A42H8sf+rJv/y2EZHppBnpjVh2gq/Dvwa8GkRZDmGDt5Oior/KkOftZpfrdkXQgqG7vEhAAbMSC/gc8/TE/B8XBxAcFYUkD1BixwmfSq/x9mJ6X6BbJjXxebFjRSrVdqf4rFzjd2b+RgWd7zt8IBmLEHD6HRx2KPqmK3lqDwqBuY2BU3954EFpvqko968RN7TQqiJFtnFuTooLQyCjZEmq2joiN4jtoosbaborEfDIGIyBDPLSF6hJbuoLem/KD2X5PmLrzwpY+KE6hV38kW223Myh+zvJSAYClTw+QGYiR4oWPR6XE0O7jN9u8vkKzDlsKVt8R+SRN1jETL0f47PLnciCNVUOg0BCKmq18aWuAG8xdbp7dRcJ/8n9K4VZeAOTmx7gNroXAaNJBDrd0lgtq7Ga43wMwFwm2/MEpeaRycEOlBBeq2YNI1s1gleGp4cB6/dgLhi2M16ZJUCx9QknHOVbZa5oO1d+GeeDNhrCOVIY1bxVrl2xurqum2clyTe43MRNNZE7UO/Kr6oUN9Mwwbu8vnPWxTpJBIAXK7Snaa7aIxy/ZmvMCqjbRGp9tK3OE1aX5rRXqZ1F0GhUOk3fcPsLRoj4xKW5QCQl9pmHLryoapF3NQQkFsjrhp7ywOuPvs8I+9VyiYAslIBPwXAzinPcE69D2Sa7jcXnLW/zycnZJ0/mE38fQnZBgw2nAesttGXohjMpEZAEDHw6d/EjAs6OBV3vhZ4SGbR09hC7ZIcG0KG/dFLIhqCAlCtFRIcC22CdEijCLkS8aC6CsMKWDSaS2q59/xKf4HfkcE5zh8T6+6nHQDAUTXbix0yms/Qtheqpu6jKE5q5uHQ67LlonnCdDqTVK0GRsXcq52ImssExqINyyWfp+I7YXwBlTm3yPhc5CWvDvgHy7Paz+Eg8xx//5DlMiIbPezUeQnxOo63kdsZWT0geTrd9LgJBgH/ZLkEXOXXLlmkc5KHNnM0FiroReYV4UhbWJ+bzUXsDd4N2eErmzkflBWzU4nI9dCrjSpzZ6mH22vXKqiQWCbWq8EkpwIs/cXGEmyBm43mRKnp5IuPaemTYMykf1NLPJ+sg0zgjYyxk/l7jTOJT9ykfxjCf3j16Ec0cJ8f9XCLRutU6wJt90BqIDfjnP+HOuZR57K6A+R0XtVD+dKrBpd8hy0C4+4rhOlZOvK8klrXSiqvSFtN7OzaJtNMH+BNj5oGVOqvSlaIN3SdVLA0ib2C6iXe2UMfDE2+iGoAlVhkRKKeWPcyC/xwX+sp6dYyNOvn4ag/eC+yV+Vehj3Z/Ip0a415a1Fjd5TU6tg0zIR5g5u6/hGwvhJpwcDXgO2sjw74m4fg/HhN0nOECUBV58ug9hSZia9b9Tr1CZ72tm/DyBOjnyAy7letnSgDSRHw66EaR1OMmnfEzew0BtzeczoCegaNJD+UMGWuL/WRDHd32BuxUg07fgsYltO7PdsV0nzP9p8qRHSQnJL+Kaua7YgkNFShalNxquS4ZAEUxR1XoYoINKzC+2z/dOab0ePvYDbnlIF+DW1Y7JzQpyr3kCE1T3gK110tyvimvZIfAXWupJfJa6pXLJ3PRLJBWnkUrbYBfKoGH3WQpxjUEowd99FsbaPDsJOXJywoiTDzAHxIFT6s50c1xpLXxSepN5kox0CFpBUihGY8SNTkOrVuFx1d5N6MujkKU4GZ/Oz7O/sNfgYQrY/yyE2gKXtWcyJ6evkDm5GfFH7vSJnbYEK6ltyPkOL3C8s0th5oaKZ0V2UzUPstIqZ7gtLjZhzg9U0hQVNlLeZs8FMofPCxR44g19I9Q6TVyoxKN1m5sEHwb/dFHbiU5MgMcszo2lbqLI5g+B02qvRyTGPYMzuSMDhvMapF8KcEPdhJzTq9VRTvNyix9Q90k6VaDIGUhSeBYP+qdf6QnAnDJOwmq/tU5rU0Bzpj+kH0aHNsrmyrWH1Bcyy+muNinDEcCfNfZjggpoqjm+FI9QIVqmWRx5aWcRyMuWEkKlM17mcTRqQ0qKSrQRqq6/7R8mDls0VdGzRyPPs2NCK8pPTtN0BUEolxMhZ4VG9rHF+i6zGP+rL//1FF+qeyy/L3W2Te84lhfcf3ruPf+wqQPjuIkTjWyzabStB5bfd5qEiVDyjwfG7dJrMIf1Z5lQ38JJq9sv3jJ7GnpoCbcI4cTVA8qWfxnKpHXwYI1PkorHOZHM1FJNnFmjmBof3Qj9/RLgEA4f8o5H98C8HYSkmhvQt6HGoYEC67QbK59Usu7VtxT81o3PNMxxqt8CX+Y6NOMlk4jAtkLtThEsJWeSuXX4K1GCOLpp7lY7ji6h3mS0TbRup/K6ggHvt5WUy/gaM+n7jSYey+UrJ635aFyDSRziKugvy9zvt1cLQ1EA6KcwSzYB93FzXSFWwhJlkTP/GseAknhpnv3Wc/NvYeWU6I6271MAcD5gokqPAcD07pISo1Bn6nULx9/w1Oyj40Xj8jTfSLLlTdRiZRFO3dPbGcI7CmeUz4rMpAiRx+d/TGhQrTD9U+ibIFbS35Ese/ToLqkSvbIN5r35Ccgh0f2qt7OG3p0QS6STjdIU/HEmkry6gRgZ/vjqXGnb7yWvM+Lpg3FozKsCv7SqLGgOVcnCYWR0IVL7l7wHzasDcLGiKfa9p1fypAdjgEQMLw3qPCXrT4LujhHuDcgqgiarHDrTtdg6rcTLWyRMI5uMkulo15ol+aQnsznmo5CKg+83mddvnXbaKIzlN0WjWjrt1gl3f5UG2w8tlCJ4zqQaUyvBECrW4VfKlrfirIuda3OoY6WEXEscFEc8I1V3Nh2asAqvtBHFXRDMYvvwdIDNGb+6LtOxZMHNSEqjKsr3qF2+VxHtN/gf3o0s1c/gjnlNeVCC7+HT3Yb9dNvX41E9hZkdoIACxpSF0lhwkMXigSXIh4KWyFJCFW4hCHzyq5T/B1FkfJB+xVOr8blB7oDgbRTvANmlmHlZqXO2JLBM691HIl4MixCPc4UnPBzY8xDO9rw+j4BRCCCmkhUoqFQP6VE9zwOFakZp59rcV5Ycnwf3pFW1i7evfQahGMxKvnpq2UQWxfNOcRb1wzeyswayTAJdx2tcL4rypz6j7otXBUsmEH/z4KHyDayKzfINMqn5G/km1PWXzxrQF5GHJbJwjrhdvtIgnBX2pxf3h5IMfLW7TsYJCDwhG+gR+TdIkztvOi6rUHRR+CcNvBGnGnk355iBk1S5rXAKA0x/2cH/AEoWysu9g5/pSNPUt0zKjPWkb0/P/JiENJIRszv5UZchemphMBOCPNUgmSyWgDlSi3UF7uL6i7Tu05V0ksejMbCdUJBCcCCFFz0imh3paen3dz2miR9cKGakWdP3id9r2n9r65mb1MmhJ+7nPDZh5RLkOvjLDWMKRka4ZEgnH7MR9Cs5wyKaEbF5OT02HJHZTsGma3UnFwwDkprnxJC3H1WtTB4Izru6xVU6AAbjdZm2Mg9V+giVdzm/c5X8h0/lWfT3i0iM1tzRLzWwb/KCpoiu78gitsFjs9y4fjOWJvltkoR5WRFtzIuFLX+fzzIJ/Q2y/XMqSIHnhMY8tvnrbW5VfW0mEp0APN6xQkz8vnKVOliwQiDcVfpMcO2dwcjcbGAnKuRoZU6yVnPD5qDLyGb8VjxBG5YG2iA3kXchKeuZPDTyhy/9hnuunwAEuAAvN9L/Y+6v35FhL7ZIDaWZdZ4mx+lFhcMTJUeCSXqmFMFzTlbJGNGubBP1aIir6f9wfJf8lWhzAk5+RO4SViL4qu4e9ZncQ51+bMOV/Xe+2fA0TD6XxGUNZmMy/A2bb7Jg83Fs0IfYRHuoScbYbfC+hzGB9szBJ/y0inNl+FPk3LkG57jRZijVpV+xxpeoIX5ClDrMCfCzYIcikRYqHZ0il7EcFj+aQWaNiKpP2xUCj661bQUUscIshKE3m5m4dYTIgAAAAAAAAAAAAAAAARH50SEDQqEhQ9eQNQfvaDvBz2Unzfof9+vmSOlMGiW6KNSgQddz2I2x2doj6uV80YGn280hGq0LPYTaZ2iXKRLkmflnBLZqjxEn18rudYLjaaLhxduT0VBwKX7/ey37euLlhYZg76Q8FpcwaUVAtIFJMXviMlMqFvw+AvI/z3Y74gOSq4K31VpVhTIbnd9xbCefex9+hhrKXkVIWBJSbvFknfa4Nomo/+pKJ1GS1WwshDb1MVUT1aQK5pHa32UeXyBbvPZ47ROZmL2JWyiLPDJzDuJKVLbY8ffekbo2XCLm2Ek4xAJFZgUOYIm2UDk+WQF3nP51nE08RaK+KNzj+fJroOt/5PovMl8uXdiTPxB/HOcmyOwX/Aq+H4uX86Qc/yDU8UWB5KfODKTJ56iWwZBI6zaYVroed67l4MA2ODHg6JOFjZj3B7EN5GxXHuMDI2ND/foGui09Hw00D1JHsu+H1MCPhiO3D8NcsxD27XT6g85oUrcrhOiJitmrn/0svqbSZ3nfT2JeFNz21blhVcEI+hX6Z9JnjesyUgmFcUM4A9PpSt0vtSVzYcKWLklwcyibUGNkTIdXQ0z1K97A/wrgXPJ2HUK+eVcM/YJvUZQsZ7d8n0dL9cibKG5C8s0g928q49tXA7sSbY6lx0jNAAAAAAAAAFEeet/oq+r7fRDA3XZsYKrWcLfQMiraVy7Ur3sk/sCKhANKYbjZJpaXOsH9IXVWUT5Mw0E+0vVz8TiNwi+1jvktSTc358GLP78QB9CdElEDh1vRxxUgr9oTooFEsv4+Cel2Sl4KzV7jQT9h2hwmJXZ2B4Ks+HOl3spLYZ/i2YvZcZRQMHavy0Es7b6swRn/ug/lXkUP2roRLRz95taWVJNR/+R7JH4OA4fqzbio9UmYWHgwkjSuJO9Oj7nWXKRL+DFAL/Gk9oSyZleIClKVWMUX3/ba/HNEJzpEPIlXHwx7L9eGTY3ZVt5dFCHiBShiXKxxLU0W+6QTzw9X3Vag2+jIZKYIhe5QyoeFfNot2AbYnLRxsk+rsi+ylUY/EtsTwdRrGmsnsCBaj7zrjoJZQ0yEBzSwx/TbPFNgVn6E+F4kID1v1YCdy/OWMOlis0fk3v3f6B4tgdg0JRipO5Y+NnsXJUsrGawbMVjz4XOBpkRhgN/1kiAT6YMlM17oa77H8LS8YMSob0yoQkVzdZAoXO5tF7hceR/vq6dJrSs+Jkzar1jOJV45dn/UzWzcrPMMDjAvWOyhVY+4bEdTZfuwQqje6lFvybqs6y8ErxEhpXWpnfzfA2088rK+55glYKYjdNIrfh4zZb00aBHkVJFYAUTEPU7BetbD2WgN7VQbxqMrzl9G3NbS2MdCYWRRGgp4DK17UROYdD5hyIwvPzhVa/XLHFmH+AAAAAAAAAAPOFwD+LRp0IqA0JnOYu5zHQ/XO/wl1bidAWl8rOF2s5yr9cLpEBmvPOV1JZe5xxJhkEsmS5oOH78sOy53ZKTU6C5wcK5oUx/G7HZL5awH3Y2jHY23HhH69JwRdE6WZ0YhI7oVgp+WdK0WeTPaJG5jRTTkXSS9eTNu4w2gK/Oag7dh+jfvF1DL5lhhbl5lTvkj8zired2g0f90zIDArAfunLCamV/TcMmnfJFRG3+Wzot7fWdEODHdtPaF3UurvTtCs0EmMRjxZHgkfc/shtYirDV+GucLiPncLKdAi06Hn8/BHlB0NPtuRHCefh1bNildvODzr3uIe+wS175ETADTclBCewmSJ9LOr95Gx8wEid7NzyJ3dGKZOJuxKBN3x6Ha3ynqfvTEGbsxCjQttTgcsORRrZNMB1HJI7kTeQe/s3Qi7v2/KUyyluHNXW5/rwR8d4CMfvs5us6LcXwV3EGzLct/IMEonsdrJ3g+TBdofaKlcPdKYSKvvziCp108HaunbYabPyRA/+lqzUQUnS0u9wi4xRMGVT0FA0LWQWQi8mhEBQSlmvVa5CAnN2X6Xo1wDpH8aiZBkRo0IZ5ll+3do2MeowKCrDuhRcifJlqP1wUfXOJTM94JGSceyEeXmbC2PRxKUC3Kt1EfdniuoaY0iS7LP6PUEiTVwDzHRyCqqNHtVtCf8mdKSq1heFmXmdHG2ws4vyXHxyJ/hT+9g67Jmoi5Sfv3xvrhNb2X4PRsf9+KXaLr/kzs8SmZD094Bg8Hv/VD3xO9sE/BBlS1d0wEvUMUxco33B1GA32ME0u8r6mw2QHUAob7oTKbn/OMb/8R4tFnHH6W8JHB9RQrdGOUTxWWJlZrIm/tJyWFsgclfxQ8hR6NG6qANXjGzYVzMOfrSQbyd1bz4MxC2Rxs4Q8wwxuvnVF9HhCvIScS3v5uZL9SBknflawJZ2T+xWNse4MpS1yvsXYtxyziGmsMkjVsKByYXESLk8otByQWxhgffiE6LwKWhBbqxrVJkTm/tVEAlNnTl/B65CEZodraeQel3BfWda8IIyeLRzWHI5NXR/W6TzqbWMjtDxRuFrmUQQCrQjhXyt0dcfS8Y2HZqNKo5/6rIc9+1VC6WT4Kg8Z9C6fMi9tCSmiKzW+FjVmW0U698AXmrzYX7dFcM3c8YoT3Pfzav2OEMidNmxg4A9+t0YCDXi7ORNBNSG3omWHqL93uWKwLRKA7Ros/WMejMEOkA6nwW7tYZLMiY7F3zQSaIJZmY7q2sYCDfd9th/2iQb8fS6+lSDQDj8Nc56ocFdVOMemOL4auLEsr3JsK2hLYLTqV/gaxTWQWUXN836+vNou2SIGgRIPamOERB0/9m//nm23ZV0+afmdzwWc5YyAAAA==" alt="PAMANA 2026" width="707" height="135">
+    </div>
+    <h1 class="eval-title">Mission debrief</h1>
+    <p class="eval-intro">
+      Rate each statement from <strong>1</strong> (extremely dissatisfied)
+      to <strong>10</strong> (extremely satisfied). Your answers are
+      anonymous: they are saved without your name or ID.
+    </p>
+  </header>
+
+  <main class="eval-main">
+
+    <!-- Step 1: confirm who you are (no Google sign-in needed) -->
+    <form id="signinForm" class="signin" novalidate>
+      <p class="eyebrow">Step 1 of 2</p>
+      <h2 class="signin__title">Confirm your boarding pass</h2>
+      <p class="signin__help">
+        Enter your Participant ID and the email address your PAMANA emails were sent to.
+        We only use them to check that you attended and haven't evaluated yet.
+      </p>
+      <div class="field">
+        <label for="participantId">Participant ID</label>
+        <input id="participantId" name="participantId" autocomplete="off" autocapitalize="characters"
+               spellcheck="false" placeholder="PAM-012" required>
+        <p class="field__hint">It's under your QR code in your PAMANA email.</p>
+      </div>
+      <div class="field">
+        <label for="email">Registered email</label>
+        <input id="email" name="email" type="email" autocomplete="email" spellcheck="false" required>
+      </div>
+      <p id="signinError" class="form-error" role="alert"></p>
+      <button type="submit" id="signinButton" class="button button--amber">Continue</button>
+    </form>
+
+    <!-- Loading, error and thank-you messages appear here -->
+    <section id="status" class="status" role="status" aria-live="polite" hidden></section>
+
+    <!-- Step 2: the evaluation itself -->
+    <form id="evalForm" class="eval-form" hidden novalidate>
+      <div id="sections"></div>
+
+      <section class="eval-comments">
+        <label class="eval-comments__label" for="comments">
+          Anything else you'd like to tell the organizers?
+          <span class="eyebrow">Optional</span>
+        </label>
+        <textarea id="comments" maxlength="1000" rows="5"></textarea>
+      </section>
+
+      <p id="formError" class="form-error" role="alert"></p>
+
+      <div class="submit-bar">
+        <p id="progress" class="eyebrow">0 / 20 answered</p>
+        <button type="submit" id="submitButton" class="button button--amber">
+          Submit evaluation
+        </button>
+      </div>
+    </form>
+
+  </main>
+
+  <div class="grain" aria-hidden="true"></div>
+
+  <script>
+    /* =========================================================
+       Runs in the participant's BROWSER (GitHub Pages copy).
+       Same questions and rules as Script_Evaluate, but it talks to
+       Apps Script with fetch() instead of google.script.run, and it
+       sends NO Google sign-in, which avoids the multi-account error.
+       ========================================================= */
+
+    // The PAMANA Public /exec link. doPost() in EvalApi.gs answers it.
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwTyUnpqT26QvQIVJ7CO6N4e_YMl0K5rg2jQd1mqhhSmSMUqgKH1Il7ZFpCmYFuVyGe/exec';
+
+    // Questions from the official UM Summary of Activity Evaluation Form.
+    // The codes (A1, A2...) must match EVAL_QUESTION_CODES in Evaluation.gs.
+    const EVAL_SECTIONS = [
+      { letter: 'A', title: 'Activity Design', items: [
+        'The program content met my needs.',
+        'The length of the program was adequate.',
+        'This program is consistent with the stated objectives.',
+        'The program is appropriate for the intended audience.'
+      ]},
+      { letter: 'B', title: 'Activity Objectives', items: [
+        'This program has enriched my understanding of the topic discussed.',
+        'This program lets me know what to do about the topic.',
+        'This program made me think critically about expected standards.',
+        'This program made me aware of available resources and what to do with them.'
+      ]},
+      { letter: 'C', title: 'Resource Speakers', items: [
+        'The speakers are knowledgeable in the content assigned to them.',
+        'The speakers are consistent with the objectives of the program.',
+        'The speakers clarified the content in response to the questions posted.',
+        'The speakers have contributed to achieving my personal and professional goals.'
+      ]},
+      { letter: 'D', title: 'Facilities / Arrangements', items: [
+        'Meeting rooms and facilities',
+        'Day and time',
+        'Time allotment',
+        'Emcee / host'
+      ]},
+      { letter: 'E', title: 'Desired Outcomes', items: [
+        'I was able to update my skills.',
+        'I acquired new and/or advanced skills.',
+        'I have better knowledge upon which to base my decisions/actions in the practice setting.',
+        'I am reconsidering my views toward the topic(s) presented.'
+      ]}
+    ];
+    const TOTAL_QUESTIONS = 20;
+
+    const STATUS_MESSAGES = {
+      invalid:        { label: 'Signal not recognized',   title: "We couldn't verify you",
+                        body: 'Please reload this page and try again. If it still fails, contact an organizer.' },
+      not_checked_in: { label: 'No docking record',       title: 'No check-in found',
+                        body: 'Only scholars who were checked in at PAMANA 2026 can evaluate. If you attended, please contact an organizer.' },
+      already_done:   { label: 'Transmission received',   title: "You've already evaluated",
+                        body: 'Your evaluation was recorded earlier. Thank you!' },
+      saved:          { label: 'Transmission received',   title: 'Thank you, scholar',
+                        body: 'Your evaluation has been recorded. It helps shape the next PAMANA.' },
+      error:          { label: 'Connection interrupted',  title: 'Something went wrong',
+                        body: 'Please check your internet connection and reload this page.' }
+    };
+
+    const signinForm   = document.getElementById('signinForm');
+    const signinButton = document.getElementById('signinButton');
+    const signinError  = document.getElementById('signinError');
+    const statusBox    = document.getElementById('status');
+    const form         = document.getElementById('evalForm');
+    const sectionsBox  = document.getElementById('sections');
+    const progressText = document.getElementById('progress');
+    const submitButton = document.getElementById('submitButton');
+    const formError    = document.getElementById('formError');
+
+    // Remembered after step 1, sent again with the answers so the server re-checks
+    let credentials = null;
+
+
+    /* ---------- Talk to Apps Script ---------- */
+    // Plain-text body = a "simple" request, which Apps Script accepts from other sites.
+    // credentials: 'omit' = never send Google cookies (that's the whole fix).
+    function callApi(payload) {
+      return fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit',
+        redirect: 'follow'
+      }).then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      });
+    }
+
+
+    /* ---------- Show a status message (and hide both forms) ---------- */
+    function showStatus(key) {
+      const message = STATUS_MESSAGES[key] || STATUS_MESSAGES.error;
+      statusBox.innerHTML = '';
+
+      const label = document.createElement('p');
+      label.className = 'eyebrow';
+      label.textContent = message.label;
+
+      const title = document.createElement('h2');
+      title.className = 'status__title';
+      title.textContent = message.title;
+
+      const body = document.createElement('p');
+      body.className = 'status__body';
+      body.textContent = message.body;
+
+      statusBox.append(label, title, body);
+      statusBox.hidden = false;
+      signinForm.hidden = true;
+      form.hidden = true;
+      window.scrollTo(0, 0);
+    }
+
+
+    /* ---------- Step 1: Participant ID + email ---------- */
+    signinForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      signinError.textContent = '';
+
+      const participantId = document.getElementById('participantId').value.trim();
+      const email = document.getElementById('email').value.trim();
+      if (!participantId || !email) {
+        signinError.textContent = 'Please enter both your Participant ID and your email.';
+        return;
+      }
+
+      signinButton.disabled = true;
+      signinButton.textContent = 'Checking…';
+
+      callApi({ action: 'check', participantId: participantId, email: email })
+        .then(function (result) {
+          signinButton.disabled = false;
+          signinButton.textContent = 'Continue';
+
+          if (result.status === 'ok') {
+            credentials = { participantId: participantId, email: email };
+            buildQuestions();
+            signinForm.hidden = true;
+            form.hidden = false;
+            window.scrollTo(0, 0);
+          } else if (result.status === 'not_found') {
+            signinError.textContent = "That Participant ID and email don't match our list. " +
+              'Check both, and use the email your PAMANA emails were sent to.';
+          } else {
+            showStatus(result.status);
+          }
+        })
+        .catch(function () {
+          signinButton.disabled = false;
+          signinButton.textContent = 'Continue';
+          signinError.textContent = "Couldn't connect. Check your internet and try again.";
+        });
+    });
+
+
+    /* ---------- Build the 20 questions from EVAL_SECTIONS ---------- */
+    function buildQuestions() {
+      if (sectionsBox.childElementCount) return;      // only once
+      EVAL_SECTIONS.forEach(function (section) {
+        const sectionEl = document.createElement('section');
+        sectionEl.className = 'eval-section';
+
+        const letter = document.createElement('span');
+        letter.className = 'eval-section__letter';
+        letter.setAttribute('aria-hidden', 'true');
+        letter.textContent = section.letter;
+
+        const heading = document.createElement('h2');
+        heading.className = 'eval-section__title';
+        heading.textContent = section.title;
+
+        sectionEl.append(letter, heading);
+        section.items.forEach(function (text, index) {
+          sectionEl.append(buildQuestion(section.letter + (index + 1), text));
+        });
+        sectionsBox.append(sectionEl);
+      });
+    }
+
+    function buildQuestion(code, text) {
+      const fieldset = document.createElement('fieldset');
+      fieldset.className = 'question';
+      fieldset.id = 'q-' + code;
+
+      const legend = document.createElement('legend');
+      legend.className = 'question__text';
+      legend.innerHTML = '<span class="question__code"></span>';
+      legend.firstChild.textContent = code;
+      legend.append(text);
+
+      const scale = document.createElement('div');
+      scale.className = 'scale';
+      for (let value = 1; value <= 10; value++) {
+        const option = document.createElement('label');
+        option.className = 'scale__option';
+        option.innerHTML =
+          '<input type="radio" name="' + code + '" value="' + value + '">' +
+          '<span>' + value + '</span>';
+        scale.append(option);
+      }
+
+      const ends = document.createElement('div');
+      ends.className = 'scale__ends';
+      ends.setAttribute('aria-hidden', 'true');
+      ends.innerHTML = '<span>Dissatisfied</span><span>Satisfied</span>';
+
+      fieldset.append(legend, scale, ends);
+      return fieldset;
+    }
+
+
+    /* ---------- Progress counter ---------- */
+    form.addEventListener('change', function (event) {
+      const answered = form.querySelectorAll('input[type="radio"]:checked').length;
+      progressText.textContent = answered + ' / ' + TOTAL_QUESTIONS + ' answered';
+      const question = event.target.closest('.question');
+      if (question) question.classList.remove('is-missing');
+    });
+
+
+    /* ---------- Step 2: submit the answers ---------- */
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      formError.textContent = '';
+
+      const ratings = {};
+      let firstMissing = null;
+      form.querySelectorAll('.question').forEach(function (question) {
+        const code = question.id.replace('q-', '');
+        const chosen = question.querySelector('input:checked');
+        if (chosen) {
+          ratings[code] = Number(chosen.value);
+        } else {
+          question.classList.add('is-missing');
+          if (!firstMissing) firstMissing = question;
+        }
+      });
+
+      if (firstMissing) {
+        formError.textContent = 'Please answer every statement before submitting.';
+        firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstMissing.querySelector('input').focus({ preventScroll: true });
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sending…';
+
+      callApi({
+        action: 'submit',
+        participantId: credentials.participantId,
+        email: credentials.email,
+        answers: { ratings: ratings, comments: document.getElementById('comments').value }
+      })
+        .then(function (result) {
+          if (result.status === 'incomplete') {
+            formError.textContent = 'Some answers were missing. Please check every statement.';
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit evaluation';
+            return;
+          }
+          showStatus(result.status === 'not_found' ? 'invalid' : result.status);
+        })
+        .catch(function () {
+          formError.textContent = "Couldn't send. Check your connection and press Submit again.";
+          submitButton.disabled = false;
+          submitButton.textContent = 'Submit evaluation';
+        });
+    });
+
+    // Pre-fill the ID if the link has ?id=PAM-012
+    const presetId = new URLSearchParams(location.search).get('id');
+    if (presetId) document.getElementById('participantId').value = presetId.slice(0, 12);
+
+  </script>
+</body>
+</html>
